@@ -4,6 +4,8 @@ import com.example.Online_Library_Application.DTO.BookDTO.UserBooksResponseDTO;
 import com.example.Online_Library_Application.DTO.UserDTO.UpdateMembershipRequest;
 import com.example.Online_Library_Application.DTO.UserDTO.UserResponseDTO;
 import com.example.Online_Library_Application.Repository.BorrowedBookRepository;
+import com.example.Online_Library_Application.exception.InvalidCredentialsException;
+import com.example.Online_Library_Application.exception.UserAlreadyExistsException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +26,9 @@ public class UserService {
     private BorrowedBookRepository borrowedBookRepository;
 
     public User registerUser(User user) {
+        if (isUserExists(user.getEmail())) {
+            throw new UserAlreadyExistsException("User Already Register with email id");
+        }
         return userRepository.save(user);
     }
 
@@ -37,7 +42,7 @@ public class UserService {
         if (existingUser.isPresent() && existingUser.get().getPassword().equals(password)) {
             return existingUser;
         } else {
-            return Optional.empty();
+            throw new InvalidCredentialsException("Invalid email or password");
         }
     }
 

@@ -1,31 +1,28 @@
 package com.example.Online_Library_Application.controller;
 
-import java.util.List;
-import java.util.Optional;
-
 import com.example.Online_Library_Application.DTO.UserDTO.*;
 import com.example.Online_Library_Application.model.User;
+import com.example.Online_Library_Application.service.JwtUtil;
+import com.example.Online_Library_Application.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Optional;
 
-import com.example.Online_Library_Application.service.UserService;
-
-@RestController
-@RequestMapping("/api/users")
-public class UserController {
+public class UsersController {
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
     // User Registion API
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
-        if (userService.isUserExists(request.getEmail())) {
-            return ResponseEntity.badRequest().body("User already registered with this email.");
-        }
-
         User user = new User();
         user.setName(request.getName());
         user.setEmail(request.getEmail());
@@ -33,24 +30,24 @@ public class UserController {
         user.setUserType(request.getUserType());
         user.setMembershipStartDate(request.getMembershipStartDate());
         user.setMembershipMonths(request.getMembershipMonths());
-
-        return ResponseEntity.ok(userService.registerUser(user));
+        User registeredUser = userService.registerUser((user));
+        return ResponseEntity.ok(registeredUser);
     }
 
-
-    // User Login
+    //login Api
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         Optional<User> user = userService.login(request.getEmail(), request.getPassword());
 
         if (user.isPresent()) {
             User u = user.get();
-            LoginResponse response = new LoginResponse(u.getName(), u.getEmail(), u.getMembershipMonths());
+            String token = jwtUtil.generateToken(u.getEmail(), u.getUserType().name());
+            LoginResponse response = new LoginResponse(u.getName(), u.getEmail(), u.getMembershipMonths(), token);
             return ResponseEntity.ok(response);
-        } else {
+        } else
             return ResponseEntity.status(401).body("Invalid credentials.");
-        }
     }
+
 
     // 3. Get All Register Users List
     @GetMapping("/getByALLRegisterUser")
@@ -68,7 +65,8 @@ public class UserController {
         return ResponseEntity.ok("Membership is valid.");
     }
 
-    // usermenbership update
+    // User membership update
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{userId}/update-membership")
     public ResponseEntity<String> updateMembership(
             @PathVariable Long userId,
@@ -82,6 +80,6 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body("Membership is still valid or update failed.");
         }
-    }
 
+    }
 }

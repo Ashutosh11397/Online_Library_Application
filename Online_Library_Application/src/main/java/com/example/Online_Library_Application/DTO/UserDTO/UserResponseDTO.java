@@ -1,6 +1,8 @@
 package com.example.Online_Library_Application.DTO.UserDTO;
 
 
+import com.example.Online_Library_Application.model.LibraryUserType;
+
 import java.time.LocalDate;
 
 public class UserResponseDTO {

@@ -4,11 +4,13 @@ public class LoginResponse {
     private String name;
     private String email;
     private int membershipMonths;
+    private String token;
 
-    public LoginResponse(String name, String email, int membershipMonths) {
+    public LoginResponse(String name, String email, int membershipMonths, String token) {
         this.name = name;
         this.email = email;
         this.membershipMonths = membershipMonths;
+        this.token = token;
     }
 
     public String getName() {
@@ -34,4 +36,14 @@ public class LoginResponse {
     public void setEmail(String email) {
         this.email = email;
     }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+
 }

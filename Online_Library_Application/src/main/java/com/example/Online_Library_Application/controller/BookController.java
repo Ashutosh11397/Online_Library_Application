@@ -28,19 +28,24 @@ public class BookController {
         List<String> skippedBooks = new ArrayList<>();
 
         for (AddBookRequest request : requests) {
-            if (bookService.existsByName(request.getBookName())) {
-                skippedBooks.add(request.getBookName());
-                continue;
+            try {
+                if (bookService.existsByName(request.getBookName())) {
+                    skippedBooks.add(request.getBookName());
+                    continue;
+                }
+
+                Book book = new Book();
+                book.setBookName(request.getBookName());
+                book.setAuthor(request.getAuthor());
+                book.setCategory(request.getCategory());
+                book.setStatus(BookStatus.AVAILABLE);
+                savedBooks.add(bookService.addBook(book));
+
+            } catch (Exception ex) {
+                skippedBooks.add(request.getBookName() + "error" + ex.getMessage());
             }
 
-            Book book = new Book();
-            book.setBookName(request.getBookName());
-            book.setAuthor(request.getAuthor());
-            book.setCategory(request.getCategory());
-            book.setStatus(BookStatus.AVAILABLE);
-            savedBooks.add(bookService.addBook(book));
         }
-
         Map<String, Object> response = new HashMap<>();
         response.put("savedBooks", savedBooks);
         response.put("skippedDuplicates", skippedBooks);
@@ -59,5 +64,5 @@ public class BookController {
     public ResponseEntity<?> updateBookStatus(@RequestBody UpdateBookStatusRequest request) {
         return ResponseEntity.ok(bookService.updateBookStatusByName(request.getBookName(), request.getStatus()));
     }
-    
+
 }

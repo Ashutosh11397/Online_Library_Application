@@ -6,6 +6,7 @@ import com.example.Online_Library_Application.DTO.BorrowedDTO.CategoryReportDTO;
 import com.example.Online_Library_Application.service.BorrowedBookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -37,6 +38,7 @@ public class BorrowedBookController {
         return ResponseEntity.ok(response);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/category-report")
     public ResponseEntity<List<CategoryReportDTO>> getCategoryReport() {
         List<CategoryReportDTO> report = borrowedBookService.getCategoryReport();
